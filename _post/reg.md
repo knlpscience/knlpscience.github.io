@@ -1,0 +1,392 @@
+---
+title: "Regression model"
+date: YYYY-MM-DD HH:MM:SS +09:00
+categories: regression
+---
+
+# Chapter 2. 단순 선형 회귀 모형
+
+# 2. Simple Linear Regression Model
+
+## 2.1 회귀 분석의 기본 Concept
+
+---
+
+### 통계적 모형
+
+우선 입력이 있으면 출력이 있는 형태$f$를 수학에서 함수라고 부르며 더 넓은 의미로 모델 또는 모형이라고 표현한다. 우리는 모형이라하면 $E=mc^2$ 나 $F=ma$같은 여러 수학적(mathematical)모형을 떠올릴 수 있을 것이다. 이런 수학적 모형을 결정론적 모형(deterministic model)이라고도 하며 명칭에서도 알 수 있듯 주어진 입력에 대해 동일 조건하에서 항상 같은 출력을 제공하는 것이 특징이다. 하지만, 현실에서는 다양한 원인으로 오차가 존재하며 확정적인 관계로 설명되지 않는 경우가 많다. 이를 위해 $f$라는 결정론적 모형에 오차($\epsilon$)라는 확률을 부여함으로써 이 현상을 설명하고자 하는 것이 통계적 모형(statistical model)이다.
+
+$$
+Y= f(X) + \epsilon
+$$
+
+- 오차의 관점에서는 $\epsilon=Y-f(X)$로 표현할 수 있고 반응과 모형의 관계가 일치하지 않는 부분을 의미한다고 볼 수 있다.
+- 통계적 모형을 사용하여 독립변수 = 설명변수 = 공변량(covariates)이라고 하는 $X$와 반응변수(response) $Y$ 사이의 관계를 설명하려는 모형을 회귀 모형이라고 부른다.
+
+오차($\epsilon$)는 주로 정규분포를 따른다고 가정하게 되는데, 이는 오차가 아주 다양한 잠재적인 원인들로 부터 생긴다고 앞서 언급했다. 따라서 잠재 변수들의 합으로 이루어진 이 오차의 분포는 중심극한정리(CLT)에 의해 정규분포임을 가정하는 것은 합리적이다. 또한 오차의 평균은 $E(\epsilon)=0$이며 설령 $E(\epsilon)=c$ 라는 상수일지라도 편향($\beta_0$)을 모형에 추가하여 보정할 수 있기 때문에 오차($\epsilon$) 는 평균이 0이고 분산이 $\sigma^2$인 $\epsilon\sim N(0,\sigma^2)$으로 가정하게 되는 것이다.
+
+오차의 평균이 0이라고 가정했으므로 통계적 모형 양변에 기댓값을 취하면 $E(Y)=f(X)$ 가 됨을 주목하자. 즉, 우리가 모델링하려는 것은 $Y$가 아닌 평균적인 반응$E(Y)$이다(상관 분석할때를 제외하고 $X$는 상수취급됨을 인지하자). 또한 이를 통해 $Y=E(Y)+\epsilon$ 이라고 표현할 수 있고, $Y$는 $E(Y)$를 중심으로 변동하는 그림을 상상해 볼 수 있다.
+
+한편, 참 모형(True model) $f$를 우리는 모르는 경우가 대부분이다. 따라서 적절한 모형을 설정하는 것이 회귀 분석의 목적 중 하나가 되겠다. 설명변수$X$가 하나이고 절편($\beta_0$)과 기울기($\beta_1$)가 있는 직선 형태의 $f(X)=\beta_0+\beta_1X$ 라고 설정하는 경우가 가장 단순한 형태의 설정이 되겠다. 만약 이처럼 모형을 설정했다고 가정하면 $\beta_0$와 $\beta_1$를 모델의 파라미터라고 하며 회귀 계수라고도 불린다. 이 파라미터를 데이터로 부터 추정하는 것이 회귀분석의 또 하나의 목적이다. 마지막으로 이렇게 파라미터를 추정해서 데이터에 적합된 모형을 얻는다면 새로운 입력에 대한 평균 반응을 예측을 할 수 있게 된다.
+
+회귀 분석을 사용할 때 몇 가지 유의사항이 있다.
+
+1. 적합된(or 추정된) 회귀모형이 적절한지 검증해야한다. 모형이 적절하지 않으면 아래와 같은 과정을 거쳐서 수정해야한다.
+   1. 모형 검증 → 모형 수정 → 회귀식 추정 → 모형 검증 → $\cdots$
+2. 회귀모형은 설명변수와 반응변수의 관계가 뚜렷해도 상관관계로 해석하며 절대 그 자체로 인과관계를 의미하지 않는다(추가적인 이론적 근거 필요).
+
+## 2.2 단순 선형 회귀모형
+
+---
+
+단순 회귀 모형은 설명변수$X$가 1개인 경우를 의미하며 다중 회귀모형은 설명변수 갯수가 $k\ge2$ 인 경우를 의미하며 이 경우 다음과 같이 표현된다.
+
+$$
+Y=\beta_0+\beta_1X_1+\beta_2X_2+\cdots+\beta_kX_k+\epsilon
+$$
+
+선형(Linear)회귀 모형은 파라미터$\beta$에 대해 선형 결합인 모형을 의미한다. 즉, 설명변수 $X$에 대해서는 선형이든 비선형이든 관계없이 다음과 같은 경우도 선형 회귀모형이다.
+
+$$
+Y=\beta_0+\beta_1X_1+\beta_2X^2_2+\epsilon
+$$
+
+이 경우 설명변수$X=(X_1,X_2^2)$을 가지는 선형 회귀모형이라 생각할 수 있다. 이를 일반화 하면
+
+$$
+Y=\beta_0+\beta_1b_1(X)+\beta_2b_2(X)+\cdots+\beta_kb_k(X)+\epsilon
+$$
+
+으로써 $b_1(X),\cdots,b_k(X)$ 으로 표현되는 설명변수를 갖는 다중 회귀모형이라고 생각할 수 있다. 이 때 $b(\cdot)$은 기저함수(basis function)라고 하며 만약 $b_j(X)=X^j$ 이라면 다항회귀이다.
+
+여기에서는 다음과 같은 가장 단순한 형태의 선형회귀를 고려하자.
+
+$$
+Y=\beta_0+\beta_1X+\epsilon
+$$
+
+각 관측치에 대해서 index를 부여하면 다음처럼 표현된다.
+
+$$
+Y_i=\beta_0 + \beta_1X_i+\epsilon_i
+$$
+
+여기서 오차 항($\epsilon_i$)은 $E(\epsilon_i)=0$이고 $Var(\epsilon_i)=\sigma^2$ 인 분포를 따른다고 가정한다.
+
+## 2.3 회귀 계수 추정
+
+---
+
+### 2.3.1 최소 제곱 추정(LSE)
+
+오차제곱합으로 표현되는 목적함수를 최소화 시켜서 파라미터를 추정하는 방법이다.
+
+$$
+L=\sum\epsilon^2=\sum(Y_i-\beta_0-\beta_1X_i)^2
+$$
+
+즉, 목적함수를 각 파라미터에 대해 편미분하여 analytic한 solution을 구한다.
+
+$$
+\begin{aligned}& \frac{\partial L}{\partial \beta_0}=(-2) \sum_{i=1}^n\left(Y_i-\beta_0-\beta_1 X_i\right)=0 \\& \frac{\partial L}{\partial \beta_1}=(-2) \sum_{i=1}^n\left(Y_i-\beta_0-\beta_1 X_i\right) X_i=0\end{aligned}
+$$
+
+그리하여 다음과 같은 정규방정식(normal equation)을 얻을 수 있고
+
+$$
+\begin{aligned}& n \hat{\beta}_0+\hat{\beta}_1 \sum_{i=1}^n X_i=\sum_{i=1}^n Y_i \\& \hat{\beta}_0 \sum_{i=1}^n X_i+\hat{\beta}_1 \sum_{i=1}^n X_i^2=\sum_{i=1}^n X_i Y_i\end{aligned}
+$$
+
+위 식을 정리하여 추정된 파라미터는 다음과 같다.
+
+$$
+\begin{aligned}& \hat{\beta_0}=\bar{Y}-\hat{\beta}_1 \bar{X} \\& \hat{\beta}_1=\frac{S_{X Y}}{S_{X X}}=\frac{\operatorname{Cov}(X, Y)}{V(X)}=\rho_{X Y} \cdot {\|Y\|\over \|X \|}\end{aligned}
+$$
+
+Notation
+
+- $S_{X Y}=\sum\left(X_i-\bar{X}\right)\left(Y_i-\bar{Y}\right)$
+- $S_{X X}=\sum\left(X_i-\bar{X}\right)^2$
+
+## 2.3.2 LSE의 성질
+
+|                 | E           | V                                                | 성질                                  |
+| --------------- | ----------- | ------------------------------------------------ | ------------------------------------- |
+| $\hat{\beta_0}$ | ${\beta_0}$ | $\sigma^2({1\over n} + {\bar{X}^2\over S_{XX}})$ | BLUE(=UMVUE)                          |
+| $\hat{\beta_1}$ | $\beta_1$   | ${\sigma^2\over S_{XX}}$                         | BLUE(=UMVUE), $\bar{Y}$와 무상관이다. |
+
+1. $\sum e_i=0$ : (=오차 평균은 0)
+2. $\sum X_ie_i=0$ : 오차의 $X_i$ 가중합 0 (=$X$와 무상관)
+3. $\sum\hat{Y_i}e_i=0$ : 오차의 $\hat{Y}_i$ 가중합 0 (= $\hat{Y}$와 무상관)
+4. 회귀 적합선은 항상 $(\bar{X}, \bar{Y})$을 지난다.
+
+## 2.3.3 $\sigma^2$ 추정
+
+$$
+\hat{\sigma}^2=s^2={\sum e^2_i \over n-2}={\sum (Y_i-\hat{Y_i})^2 \over n-2}
+$$
+
+- $n-2$: 단순 선형회귀는 다음과 같은 두 가지 제약으로 인한 자유도 2를 잃는다.
+  - $\sum e_i=0$
+  - $\sum X_ie_i=0$
+- 다른 관점으로는 회귀계수의 갯수($p$)만큼 자유도를 잃는다고 볼 수 있다.
+
+## 2.3.4 최대가능도 추정(MLE)
+
+$$
+L=\prod {1\over \sqrt{2\pi\sigma^2}}e^{-{\epsilon^2_i\over 2\sigma^2}}={1\over ({2\pi\sigma^2})^{n\over 2}}e^{-{(Y_i-\beta_0-\beta_1X_i)^2\over 2\sigma^2}}
+$$
+
+- Profile-likelihood에 의하여 다음이 성립한다.
+  1. $\sigma^2$을 fix시키고 가능도$L$을 최대화 ← $\sum(Y_i-\beta_0-\beta_1X_i)^2$을 최소화하는 것과 같아진다. 즉, LSE와 같은 $\hat{\beta_i}$를 얻을 수 있다.
+  2. $\hat{\beta_i}$를 fix시키고 가능도$L$을 최대화 ← $\hat{\sigma}^2={1\over n}\sum(Y_i-\hat{Y_i})^2=({n-2\over n})s^2$ ← UE를 보장하진 않지만, asymptotically UE 이다.
+
+### Remark
+
+오차가 정규분포를 따르면 LSE나 MLE의 결과가 같음을 보았다. 또한, MLE는 LAD의 결과와도 같다(오차가 이중지수 분포(=라플라스 분포)를 따른다).
+
+- $f(\epsilon)={1\over2\sigma}exp(-{\vert \epsilon\vert \over \sigma})$
+
+![Comparison-of-Double-Exponential-to-Normal-Distribution](C:\Users\leeseungjin\Desktop\Git\blog\knlpscience.github.io\assets\postimages\Regression model 4aeda02aa4f244adb3104f1569b1b673\Comparison-of-Double-Exponential-to-Normal-Distribution.png)
+
+- 수치적으로 계산할 수는 있지만 analytic 형태의 solution이 존재하지 않는다. LSE보다 좋은 성질을 갖고있음에도 잘 쓰이지 않는 이유이다. 또한 꼬리가 정규분포보다 두껍다.
+
+## 2.4 회귀선의 적합도(GOF)
+
+---
+
+![Untitled 1](C:\Users\leeseungjin\Desktop\Git\blog\knlpscience.github.io\assets\postimages\Regression model 4aeda02aa4f244adb3104f1569b1b673\Untitled 1.png)
+
+같은 회귀선이라도 데이터의 분포도에 따라 적합도는 다를 수 있다.
+
+GOF의 척도로 예측 표준오차 $s=\sqrt{\frac{1}{n-2} \sum_{i=1}^n\left(Y_i-\hat{Y}_i\right)^2}$ 를 쓸 수 있지만, 이것은 척도 불변(scale-invariant)이 아니다. 그래서 결정계수 $R^2$을 쓴다.
+
+이를 위해 오차를 2개의 부분으로 쪼개보면 $SST=SSE+SSR$ 로 쪼갤 수 있다.
+
+|     | 의미             | 수식                          | 자유도 |
+| --- | ---------------- | ----------------------------- | ------ |
+| SST | 총 오차          | $\sum(Y_i-\bar{Y_i})^2$       | $n-1$  |
+| SSE | 설명 안되는 오차 | $\sum(Y_i-\hat{Y_i})^2$       | $n-2$  |
+| SSR | 설명 가능한 오차 | $\sum(\hat{Y_i}-\bar{Y_i})^2$ | $1$    |
+
+### Remark
+
+$SSR=\hat{\beta_1^2}\sum(X_i-\bar{X})^2$ 로 표현할 수도 있다.
+
+$R^2={SSR\over SST}$ ← 전체 오차중에 설명가능한 오차의 비율
+
+## 2.5 분산분석(ANOVA)
+
+---
+
+| 오차 | 자유도(df) | 기대값               | F-ratio              |
+| ---- | ---------- | -------------------- | -------------------- |
+| SSR  | $1$        | $MSR={SSR\over 1}$   | $F_0={MSR\over MSE}$ |
+| SSE  | $n-2$      | $MSE={SSE\over n-2}$ |                      |
+| SST  | $n-1$      |                      |                      |
+
+- 참고
+
+  - $E(MSR)=\sigma^2+\beta^2_1\cdot S_{XX}$
+  - $E(MSE)=E(s^2)=\sigma^2$
+
+- $H_0:\beta_1=0$ ← 영향력이 없다 vs $H_1:\beta_1 \neq 0$ ← 영향력이 있다
+  - $F_0 > F_{\alpha}(1, n-2)$이면 $H_0$을 기각한다.
+
+## 2.6 추론(Inference)
+
+---
+
+### 2.6.1 $\beta_1$ 추론
+
+1. $\hat{\beta_1}$의 분포
+
+$$
+{\hat{\beta_1}-E(\hat{\beta_1}) \over V(\hat{\beta_1})}={\hat{\beta_1}-\beta_1 \over \sigma/\sqrt{S_{XX}}} \sim N(0,1)
+$$
+
+$\sigma$를 $s$로 대체하면
+
+$$
+t=\frac{\frac{\hat{\beta}_1-\beta_1}{\sigma / \sqrt{S_{X X}}}}{\sqrt{\frac{\mathrm{SSE}}{\sigma^2(n-2)}}}
+$$
+
+이기 때문에 다음과 같다.
+
+$$
+t=\frac{\hat{\beta}_1-\beta_1}{\mathrm{SE}\left(\hat{\beta}_1\right)}=\frac{\hat{\beta}_1-\beta_1}{s/ \sqrt{S_{X X}}} \sim t(n-2)
+$$
+
+1. $\beta_1$의 신뢰구간
+
+$$
+\operatorname{Pr}\left[-t_{\alpha / 2}(n-2)<\frac{\hat{\beta}_1-\beta_1}{\operatorname{SE}\left(\hat{\beta}_1\right)}<t_{\alpha / 2}(n-2)\right]=1-\alpha
+$$
+
+이기 때문에 $100(1-\alpha)\%$ 신뢰구간은 다음과 같다.
+
+$$
+\begin{equation}\hat{\beta}_1 - t_{\frac{\alpha}{2}}(n-2) \cdot \operatorname{SE}(\hat{\beta}_1) < \beta_1 < \hat{\beta}_1 + t_{\frac{\alpha}{2}}(n-2) \cdot \operatorname{SE}(\hat{\beta}_1)\end{equation}
+$$
+
+### 2.6.2 $\beta_0$ 추론
+
+1. $\hat{\beta_0}$ 의 분포
+
+$$
+\hat{\beta_0}\sim N(\beta_0, \sigma^2({1\over n}+{\bar{X}^2\over S_{XX}}))
+$$
+
+$\sigma^2$를 모르기에 $s^2$로 대신한다. 그러면 표준편차는 $SE(\hat{\beta_0})=s\sqrt{\frac{1}{n}+ {\bar{X}^2\over S_{XX}}}$ 이고 $t$분포를 따른다.
+
+$$
+t={\hat{\beta_0}-\beta_0\over SE(\hat{\beta_0})} \sim t(n-2)
+$$
+
+1. $\beta_0$ 의 신뢰구간
+
+   $$
+   \begin{equation}\hat{\beta_0} - t_{\frac{a}{2}}(n-2) \times SE(\hat{\beta_0}) < \beta_0 < \hat{\beta_0} + t_{\frac{a}{2}}(n-2) \times SE(\hat{\beta_0})\end{equation}
+   $$
+
+## 2.6.3 반응 추론
+
+---
+
+1. $E(Y)=\beta_0+\beta_1x$ ← $X=x$가 given일 때, $E[Y(x)]$는 추정을 어떻게 할까?
+
+   $E[\hat{Y}(x)]=\beta_0+\beta_1x$이기 때문에 $E(Y)=\beta_0+\beta_1x$ 의 point estimator로 $\hat{Y}(x)=\hat{\beta_0}+\hat{\beta_1}x$ 을 쓰는 것은 합리적이다.
+
+   게다가 $Var[\hat{Y}(x)]=Var[\hat{\beta_0}+\hat{\beta_1}x]=Var[\bar{Y}-\hat{\beta_1}(x-\bar{X})]$ 인데, $\bar{Y}$와 $\hat{\beta_1}$ 는 독립이기 때문에 다음이 성립한다.
+
+   $$
+   Var[\hat{Y}(x)]=Var[\bar{Y}]+(x-\bar{X})^2Var[\hat{\beta_1}]=\sigma^2(\frac{1}{n}+ {(x-\bar{X})^2\over S_{XX}})
+   $$
+
+   $\sigma$를 $s$로 대체하면 표준편차는 다음과 같이 표현된다.
+
+   $$
+   SE[\hat{Y}(x)]=s\sqrt{\frac{1}{n}+ {(x-\bar{X})^2\over S_{XX}}}
+   $$
+
+   따라서, $E(Y)=\beta_0+\beta_1x$ 의 신뢰구간은 다음과 같다.
+
+   $$
+   \begin{equation}\left( \hat{\beta}_0 + \hat{\beta}_1 x \right) \pm t_{\frac{\alpha}{2}}(n-2) \cdot SE\left[\hat{Y}(x)\right]\end{equation}
+   $$
+
+### Remark
+
+회귀 선이 아닌 모든 $x$에 대한 신뢰구간은 신뢰대라 부른다.
+
+![Untitled 2](C:\Users\leeseungjin\Desktop\Git\blog\knlpscience.github.io\assets\postimages\Regression model 4aeda02aa4f244adb3104f1569b1b673\Untitled 2.png)
+
+1. $Y(x)=\beta_0+\beta_1x$ ← $X=x$가 given일 때, $Y(x)$ 자체에 대한 추정은 어떻게 할까?
+
+   $Y(x)\sim N(\beta_0+\beta_1x, \sigma^2)$이고, $E(Y(x)-\hat{Y}(x))=\beta_0+\beta_1x-\beta_0-\beta_1x=0$ 이기
+
+   때문에 $\hat{Y}(x)=\hat{\beta_0}+\hat{\beta_1}x$을 $Y(x)$에 대한 추정치로 사용하는건 합리적이다.
+
+   ($Y(x)$와 $\hat{Y}$은 독립이다 ← 기존 관측치에 근거한 $\hat{Y}$는 예측값 $Y(x)$과는 전혀 별개의 값이기 때문)
+
+   게다가 $Var(Y(x)-\hat{Y}(x))=Var(Y(x))+Var(\hat{Y}(x))=\sigma^2+\sigma^2({1\over n}+ {(x-\bar{X})^2\over S_{XX}})$ 이므로
+
+   $$
+   {Y(x)-\hat{Y}(x)\over \sigma\sqrt{1+{1\over n}+{(x-\bar{X})^2\over S_{XX}}}}\sim N(0,1)
+   $$
+
+   $\sigma$를 $s$로 대체하면 $t$분포를 따른다.
+
+   $$
+   {Y(x)-\hat{Y}(x)\over s\sqrt{1+{1\over n}+{(x-\bar{X})^2\over S_{XX}}}}\sim t(n-2)
+   $$
+
+   따라서, $Y(x)$에 대한 예측구간은
+
+   $$
+   \begin{equation}\hat{Y}(x) \pm t_{\frac{\alpha}{2}} \cdot s \sqrt{1 + \frac{1}{n} + \frac{(x-\bar{X})^2}{S_{XX}}}\end{equation}
+   $$
+
+# 2.7 잔차 분석
+
+---
+
+1. **선형 회귀의 기본적인 가정**
+
+   - **선형성**: $**X$와 $Y$는 선형관계여야 한다.\*\*
+     - 판별법) 가중치에($\beta_i$) 대해 편미분해도 가중치($\beta_i$)가 남아있으면 비선형이다.
+       - ex) $Y=\beta_0+\beta_1e^{-{\beta_2x}}+\epsilon$
+   - **오차의 평균**: $E(\epsilon_i)=0$
+     - 이 가정으로 오차의 평균을 추정할 필요가 없어진다.
+     - 앞서 이야기 했듯 $E(\epsilon_i)=c$라면 $E(\epsilon_i^*)=0$으로 다시 정의할 수 있다.
+   - **등분산성: 모든 독립변수($X_i$) 수준에서의 오차의 분산 $V(\epsilon_i)$ = $\sigma^2$을 유지해야 한다.**
+     - 상수 $\sigma^2$이 아니라면 분산이 어떻게 변하는지 추가 분석이 필요하고 결과에따라 모수 추정 과정에 수정이 요구된다. (WLS에서 자세히)
+   - **독립성: 각 관측치 $Y_i$ (또는 오차항$\epsilon_i$)은 서로 독립적이어야 한다.**
+     - $**i**$번째 오차를 알아도 $j$번째 오차를 전혀 알 수 없음을 가정하며, 독립이 아닐경우 어떤 관계인지에 대한 다른 가정이 필요하다.
+   - **정규성**: **$\epsilon_i \sim N(0, \sigma^2)$ 오차항은 정규분포를 따라야 한다.**
+     - 이 가정에 의해 모수 추론에 t분포와 F분포를 사용할 수 있다.
+     - LSE는 분포 무관하여 $(0, \sigma^2)$이기만 하면 되지만, MLE는 분포가 필요하여 $N(0, \sigma^2)$을 가정한다.
+     - 정규분포 가정에 의심이 들면 반응변수($Y$)의 변환을 통해 근사적으로 정규성을 띄도록하는 변환모형이 주로 사용된다.
+   - $**X$는 상수**: $**X$는 확률변수가 아니고 주어진 상수로 취급된다.\*\*
+     - 자연과학 또는 공학 에서는 계획된 실험이므로 설명변수는 상수취급이 가능하다.
+     - 반면 사회과학 같은 영역에서는 에서는 $X$도 관측값이므로 측정오차가 있을 수 있다. 따라서 $X=x$의 조건부로 $Y$가 정규성을 띄는 것을 가정하며 $Y$는 그 자체로 정규성을 띄지 않아도 된다.
+       - 즉, $E(Y \mid X=x)=\beta_0 + \beta_1x$
+
+1. 오차 분석
+
+   1. **정규확률도**(normal probability plot)
+
+   2. **QQ**(quantile-to-quantile) **plot**
+
+      엄격한 정규도 대신 QQ plot을 많이 사용한다.
+
+# 2.9 상관 분석
+
+---
+
+<우선 상관 분석에서는 설명변수 $X$도 변수 취급한다는 점에 주의하자>
+
+$(X,Y)^T$가 이변량 정규분포를 따른다고 가정해보면, 평균은 $\vec{\mu} = (\mu_x, \mu_y)^T$이고 분산-공분산 행렬은 $Σ=\left[ \begin{matrix} \sigma^2_X&\rho \sigma_X \sigma_Y \\ \rho \sigma_X \sigma_Y&\sigma^2_Y \\ \end{matrix}\right]$ 이다.
+
+$Y\mid X$ 의 조건부 분포는 평균이 $\mu_{Y\mid X}=\mu_Y+\rho{\sigma_Y\over \sigma_X}(X-\mu_X)$ 이고 분산이 $\sigma^2_{Y\mid X}=\sigma^2_Y(1-\rho^2)$인 단변량 정규분포를 따른다. 따라서, $E(Y\mid X)=\beta_0+\beta_1X$ 를 얻을 수 있다.
+
+- $\beta_0=\mu_Y-\rho{\sigma_Y\over \sigma_X}\mu_X$
+- $\beta_1=\rho{\sigma_Y \over \sigma_X}$
+
+## 2.9.1 상관계수 $r$ 추정
+
+$$
+r={S_{XY}\over \sqrt{S_{XX}}\sqrt{S_{YY}}}=\hat{\beta_1}\sqrt{\frac{S_{XX}}{S_{YY}}}
+$$
+
+기울기는 상관계수와 비례관계임을 알 수 있다.
+
+### Remark
+
+$r^2=R^2$ ← 선형 회귀의 경우 상관계수의 제곱은 결정계수와 같다(비선형에선 성립하지 않는다).
+
+## 2.9.2 상관계수 $r$ 검정
+
+1. $H_0:\rho=0$
+
+   $H_0$하에서 다음과 같은 검정통계량을 얻을 수 있다.
+
+   $$
+   t=\sqrt{n-2}{r\over \sqrt{1-r^2}}\sim t(n-2)
+   $$
+
+2. $H_0:\rho=\rho_0$
+
+   $H_0$하에서 $n \rightarrow \infin$ 일 때, 피셔의 변환이라고 불리는 다음과 같은 분산안정변환을 통하여
+
+   $$
+   \frac{1}{2} \ln \frac{1+r}{1-r} \rightarrow N\left(\frac{1}{2} \ln \frac{1+\rho}{1-\rho}, \frac{1}{n-3}\right)
+   $$
+
+   검정통계량을 변환시키면 다음과 같다.
+
+$$
+Z=\frac{\frac{1}{2} \ln \frac{1+r}{1-r}-\frac{1}{2} \ln \frac{1+\rho}{1-\rho}}{1 / \sqrt{n-3}}=\frac{1}{2} \sqrt{n-3} \ln \left[\frac{(1+r)(1-\rho)}{(1-r)(1+\rho)}\right] \rightarrow N(0,1)
+$$
+
+즉, 분산안정변환으로 임의의 $\rho_0$에 대해서도 검정할 수 있게 된다.

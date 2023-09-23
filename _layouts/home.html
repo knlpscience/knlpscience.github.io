@@ -40,7 +40,7 @@ layout: default
 {% endif %}
 
 {% capture content %}
-  {% for post in posts %}
+  {% for post in site.posts %}
     <article class="card-wrapper">
       <a href="{{ post.url | relative_url }}" class="card post-preview flex-md-row-reverse">
         {% if post.image %}
